@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plano de Vida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Layout: coluna única estreita; data e anel de progresso no topo; normas agrupadas pelo momento do dia */
+  --bg:#f2f4f3;
+  --surface:#ffffff;
+  --ink:#1b2740;
+  --muted:#5b6476;
+  --line:#dde1e6;
+  --accent:#2c5592;
+  --accent-soft:#e4eaf4;
+  --gold:#a37b28;
+  --gold-soft:#f4ebd6;
+  --danger:#a33b32;
+  --wine:#8b2a3e;
+  --font-display:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-body:"Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1423; --surface:#171f36; --ink:#e7eaf1; --muted:#9ba4b8; --line:#29334f;
+    --accent:#88aae2; --accent-soft:#213156; --gold:#d8b56c; --gold-soft:#3a3120; --danger:#e48a80; --wine:#ec8fa2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1423; --surface:#171f36; --ink:#e7eaf1; --muted:#9ba4b8; --line:#29334f;
+  --accent:#88aae2; --accent-soft:#213156; --gold:#d8b56c; --gold-soft:#3a3120; --danger:#e48a80; --wine:#ec8fa2;
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:var(--font-body); font-size:16px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:640px; margin:0 auto; padding:20px 16px 48px; display:flex; flex-direction:column; gap:18px}
+
+header.top{display:flex; flex-direction:column; gap:4px}
+.eyebrow{font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
+h1{font-family:var(--font-display); font-weight:600; font-size:40px; line-height:1.05; margin:0; text-wrap:balance}
+h2{font-family:var(--font-display); font-weight:600; font-size:26px; line-height:1.15; margin:0; text-wrap:balance}
+h3{font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; margin:0}
+p{margin:0}
+
+/* Abas */
+nav.tabs{display:grid; grid-template-columns:repeat(4,1fr); gap:4px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:4px; position:sticky; top:8px; z-index:5}
+nav.tabs button{
+  font:inherit; font-size:14px; font-weight:600; color:var(--muted);
+  background:transparent; border:0; border-radius:9px; padding:9px 4px; cursor:pointer;
+}
+nav.tabs button[aria-selected="true"]{background:var(--accent-soft); color:var(--accent)}
+button:focus-visible, input:focus-visible + .box, textarea:focus-visible, .switch input:focus-visible + .track{outline:2px solid var(--accent); outline-offset:2px}
+
+.banner{background:var(--gold-soft); border:1px solid color-mix(in srgb, var(--gold) 35%, transparent); border-radius:12px; padding:12px 14px; display:flex; gap:12px; align-items:flex-start; font-size:15px}
+.banner p{flex:1}
+.banner button{flex:none}
+
+/* Cabeçalho do dia */
+.day{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px; display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center}
+.ring{width:92px; height:92px; position:relative}
+.ring svg{width:100%; height:100%; transform:rotate(-90deg)}
+.ring .pct{position:absolute; inset:0; display:grid; place-items:center; font-weight:700; font-size:22px; font-variant-numeric:tabular-nums}
+.ring .pct small{display:block; font-size:11px; font-weight:600; color:var(--muted); text-align:center; letter-spacing:.04em}
+.daymeta{display:flex; flex-direction:column; gap:8px; min-width:0}
+.datenav{display:flex; align-items:center; gap:6px}
+.datenav .label{flex:1; min-width:0}
+.datenav .label strong{display:block; font-family:var(--font-display); font-size:24px; font-weight:600; line-height:1.1}
+.datenav .label span{font-size:14px; color:var(--muted)}
+.iconbtn{width:36px; height:36px; flex:none; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:inherit; font-size:18px; cursor:pointer; display:grid; place-items:center}
+.iconbtn:disabled{opacity:.35; cursor:default}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{font-size:13px; font-weight:600; padding:3px 10px; border-radius:999px; background:var(--accent-soft); color:var(--accent); font-variant-numeric:tabular-nums}
+.chip.gold{background:var(--gold-soft); color:var(--gold)}
+.linkbtn{font:inherit; font-size:14px; font-weight:600; color:var(--accent); background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:3px}
+
+/* Lista de normas */
+.group{display:flex; flex-direction:column; gap:8px}
+.list{background:var(--surface); border:1px solid var(--line); border-radius:14px; overflow:hidden}
+.item{display:grid; grid-template-columns:28px 1fr; gap:12px; padding:13px 14px; cursor:pointer; border-top:1px solid var(--line); align-items:start}
+.item:first-child{border-top:0}
+.item input{position:absolute; opacity:0; width:1px; height:1px}
+.box{width:26px; height:26px; border-radius:8px; border:2px solid var(--line); display:grid; place-items:center; margin-top:1px; transition:background .15s, border-color .15s}
+.box svg{width:16px; height:16px; opacity:0; transition:opacity .15s}
+.item input:checked + .box{background:var(--gold); border-color:var(--gold)}
+.item input:checked + .box svg{opacity:1}
+.item .txt{display:flex; flex-direction:column; gap:2px; min-width:0}
+.item .row{display:flex; gap:8px; align-items:baseline; flex-wrap:wrap}
+.item .name{font-weight:600; font-size:16px}
+.item .when{font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.05em}
+.item .desc{font-size:14.5px; color:var(--muted); max-width:62ch}
+.item input:checked ~ .txt .name{color:var(--muted); text-decoration:line-through; text-decoration-color:color-mix(in srgb, var(--muted) 60%, transparent)}
+
+.empty{background:var(--surface); border:1px dashed var(--line); border-radius:14px; padding:18px; text-align:center; color:var(--muted); display:flex; flex-direction:column; gap:10px; align-items:center}
+
+/* Escolher */
+.presets{display:flex; flex-wrap:wrap; gap:8px}
+.btn{font:inherit; font-size:15px; font-weight:600; border-radius:10px; padding:9px 14px; cursor:pointer; border:1px solid var(--line); background:var(--surface); color:var(--ink)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--surface)}
+.btn.danger{color:var(--danger); border-color:color-mix(in srgb, var(--danger) 40%, var(--line))}
+.btn.danger.armed{background:var(--danger); color:var(--surface); border-color:var(--danger)}
+.pick{display:grid; grid-template-columns:1fr auto; gap:12px; padding:13px 14px; border-top:1px solid var(--line); align-items:start; cursor:pointer}
+.pick:first-child{border-top:0}
+.switch{position:relative; width:46px; height:28px; flex:none; margin-top:2px}
+.switch input{position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer}
+.track{position:absolute; inset:0; border-radius:999px; background:var(--line); transition:background .15s; pointer-events:none}
+.track::after{content:""; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:var(--surface); box-shadow:0 1px 2px rgba(0,0,0,.25); transition:transform .15s}
+.switch input:checked + .track{background:var(--accent)}
+.switch input:checked + .track::after{transform:translateX(18px)}
+
+/* Histórico */
+.card{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:14px}
+.monthnav{display:flex; align-items:center; gap:8px}
+.monthnav h2{flex:1; text-align:center; font-size:24px}
+.cal{display:grid; grid-template-columns:repeat(7,1fr); gap:6px}
+.cal .wd{font-size:12px; font-weight:700; color:var(--muted); text-align:center; padding-bottom:2px}
+.cal button{
+  aspect-ratio:1; border-radius:10px; border:1px solid var(--line); background:var(--bg);
+  font:inherit; font-size:14px; font-weight:600; color:var(--ink); cursor:pointer; padding:0;
+  font-variant-numeric:tabular-nums; position:relative;
+}
+.cal button.l1{background:color-mix(in srgb, var(--accent) 18%, var(--surface))}
+.cal button.l2{background:color-mix(in srgb, var(--accent) 38%, var(--surface))}
+.cal button.l3{background:color-mix(in srgb, var(--accent) 62%, var(--surface)); color:var(--surface)}
+.cal button.full{background:var(--gold); border-color:var(--gold); color:var(--surface)}
+.cal button.today{outline:2px solid var(--ink); outline-offset:1px}
+.cal button.future{opacity:.35; cursor:default}
+.cal button.missa{box-shadow:inset 0 0 0 3px var(--wine)}
+.cal button.missa::after{content:""; position:absolute; top:4px; right:4px; width:7px; height:7px; border-radius:50%; background:var(--wine); box-shadow:0 0 0 1.5px var(--surface)}
+.cal .blank{aspect-ratio:1}
+.legend i.missa{background:var(--bg); box-shadow:inset 0 0 0 2.5px var(--wine); border-color:var(--wine)}
+
+/* Botão de orações */
+.prayerbtn{
+  align-self:flex-start; margin-top:6px;
+  font:inherit; font-size:13.5px; font-weight:600; color:var(--accent);
+  background:var(--accent-soft); border:0; border-radius:999px; padding:5px 12px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px;
+}
+.prayerbtn svg{width:14px; height:14px}
+
+/* Folha de orações */
+.sheet{position:fixed; inset:0; z-index:50; display:flex; align-items:flex-end; justify-content:center}
+.sheet-backdrop{position:absolute; inset:0; background:rgba(10,15,28,.55)}
+.sheet-panel{
+  position:relative; width:100%; max-width:640px; max-height:88%;
+  background:var(--surface); color:var(--ink); border-radius:18px 18px 0 0;
+  display:flex; flex-direction:column; box-shadow:0 -8px 30px rgba(0,0,0,.25);
+}
+@media (min-width:700px){ .sheet{align-items:center} .sheet-panel{border-radius:18px; max-height:84%} }
+.sheet-head{display:flex; align-items:center; gap:12px; padding:16px 16px 10px; border-bottom:1px solid var(--line)}
+.sheet-head h2{flex:1; font-size:26px}
+.sheet-head, .sheet-jump{flex:none}
+.sheet-jump{display:flex; gap:6px; overflow-x:auto; padding:10px 16px; border-bottom:1px solid var(--line); scrollbar-width:none}
+.sheet-jump button{flex:none; font:inherit; font-size:13.5px; font-weight:600; color:var(--accent); background:var(--accent-soft); border:0; border-radius:999px; padding:6px 12px; cursor:pointer; white-space:nowrap}
+.sheet-body{overflow-y:auto; padding:16px 16px 28px; display:flex; flex-direction:column; gap:22px; -webkit-overflow-scrolling:touch}
+.sheet-body .intro{font-size:15px; color:var(--muted); max-width:62ch}
+.prayer{display:flex; flex-direction:column; gap:8px; scroll-margin-top:12px}
+.prayer h3{color:var(--accent)}
+.prayer .pname{font-family:var(--font-display); font-size:23px; font-weight:600; line-height:1.15}
+.prayer .pnote{font-size:14.5px; color:var(--muted); max-width:62ch}
+.prayer blockquote{
+  margin:0; padding:14px 16px; border-left:3px solid var(--gold); background:var(--gold-soft);
+  border-radius:0 12px 12px 0; font-family:var(--font-display); font-size:20px; line-height:1.4; max-width:62ch;
+}
+.tips{display:flex; flex-direction:column; gap:8px; background:var(--bg); border-radius:12px; padding:14px 16px}
+.tips ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:6px; font-size:15px}
+.sheet-src{font-size:13.5px; color:var(--muted)}
+.sheet-src a{color:var(--accent)}
+.legend{display:flex; gap:12px; flex-wrap:wrap; font-size:13px; color:var(--muted); align-items:center}
+.legend i{display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:5px; border:1px solid var(--line)}
+.stats{display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:8px}
+.stat.missa b{color:var(--wine)}
+.stat{background:var(--bg); border-radius:12px; padding:10px 12px}
+.stat b{display:block; font-size:24px; font-variant-numeric:tabular-nums; line-height:1.1}
+.stat span{font-size:13px; color:var(--muted)}
+.bars{display:flex; flex-direction:column; gap:10px}
+.bar{display:grid; grid-template-columns:1fr auto; gap:4px 10px; font-size:14px}
+.bar .meter{grid-column:1 / -1; height:8px; border-radius:999px; background:var(--bg); overflow:hidden}
+.bar .meter i{display:block; height:100%; background:var(--accent); border-radius:999px}
+.bar .meter i.full{background:var(--gold)}
+.bar .n{color:var(--muted); font-variant-numeric:tabular-nums}
+
+/* Dados */
+textarea{width:100%; min-height:120px; font:13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:10px; resize:vertical}
+.msg{font-size:14px; color:var(--accent); font-weight:600; min-height:1.2em}
+.msg.err{color:var(--danger)}
+.actions{display:flex; flex-wrap:wrap; gap:8px}
+
+footer{font-size:14px; color:var(--muted); display:flex; flex-direction:column; gap:8px; border-top:1px solid var(--line); padding-top:16px}
+footer blockquote{margin:0; font-family:var(--font-display); font-size:21px; line-height:1.25; color:var(--ink)}
+footer a{color:var(--accent)}
+
+[hidden]{display:none !important}
+
+@media (max-width:420px){
+  h1{font-size:34px}
+  .day{grid-template-columns:1fr; justify-items:start}
+  .ring{width:84px; height:84px}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat b{font-size:20px}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Normas de piedade · São Josemaria</span>
+    <h1>Plano de Vida</h1>
+  </header>
+
+  <div class="banner" id="storageBanner" hidden>
+    <p>Este navegador não está deixando salvar dados. As marcações valem só enquanto esta página estiver aberta.</p>
+  </div>
+
+  <div class="banner" id="welcome" hidden>
+    <p>Todas as normas diárias já vêm marcadas, menos as Preces, que são próprias dos membros da Obra. Em <b>Escolher</b> você monta o seu plano, e o que você marca fica salvo neste aparelho.</p>
+    <button class="linkbtn" id="welcomeClose" type="button">Entendi</button>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Seções">
+    <button type="button" role="tab" id="tab-hoje" data-view="hoje" aria-selected="true">Dia</button>
+    <button type="button" role="tab" id="tab-historico" data-view="historico" aria-selected="false">Histórico</button>
+    <button type="button" role="tab" id="tab-escolher" data-view="escolher" aria-selected="false">Escolher</button>
+    <button type="button" role="tab" id="tab-dados" data-view="dados" aria-selected="false">Dados</button>
+  </nav>
+
+  <!-- DIA -->
+  <section id="view-hoje" class="group" style="gap:18px">
+    <div class="day">
+      <div class="ring" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="var(--line)" stroke-width="10"></circle>
+          <circle id="ringArc" cx="50" cy="50" r="42" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="263.9"></circle>
+        </svg>
+        <div class="pct"><div><span id="pctNum">0%</span><small>do dia</small></div></div>
+      </div>
+      <div class="daymeta">
+        <div class="datenav">
+          <button class="iconbtn" id="prevDay" type="button" aria-label="Dia anterior">‹</button>
+          <div class="label"><strong id="dateTitle">—</strong><span id="dateSub"></span></div>
+          <button class="iconbtn" id="nextDay" type="button" aria-label="Dia seguinte">›</button>
+        </div>
+        <div class="chips">
+          <span class="chip" id="countChip">0 de 0 normas</span>
+          <span class="chip gold" id="streakChip">0 dias completos seguidos</span>
+        </div>
+        <button class="linkbtn" id="goToday" type="button" hidden>Voltar para hoje</button>
+      </div>
+    </div>
+    <div id="dailyGroups" class="group" style="gap:18px"></div>
+    <div id="periodicGroup" class="group"></div>
+  </section>
+
+  <!-- HISTÓRICO -->
+  <section id="view-historico" class="group" style="gap:18px" hidden>
+    <div class="card">
+      <div class="monthnav">
+        <button class="iconbtn" id="prevMonth" type="button" aria-label="Mês anterior">‹</button>
+        <h2 id="monthTitle">—</h2>
+        <button class="iconbtn" id="nextMonth" type="button" aria-label="Mês seguinte">›</button>
+      </div>
+      <div class="cal" id="cal"></div>
+      <div class="legend">
+        <span><i style="background:var(--bg)"></i>nada</span>
+        <span><i style="background:color-mix(in srgb, var(--accent) 18%, var(--surface))"></i>até 1/3</span>
+        <span><i style="background:color-mix(in srgb, var(--accent) 38%, var(--surface))"></i>até 2/3</span>
+        <span><i style="background:color-mix(in srgb, var(--accent) 62%, var(--surface))"></i>quase tudo</span>
+        <span><i style="background:var(--gold); border-color:var(--gold)"></i>completo</span>
+        <span id="legendMissa"><i class="missa"></i>com Santa Missa</span>
+      </div>
+      <p style="font-size:14px; color:var(--muted)">Toque num dia para abrir e marcar.</p>
+    </div>
+    <div class="card">
+      <h3>Resumo do mês</h3>
+      <div class="stats">
+        <div class="stat missa" id="stMissaTile"><b id="stMissa">0</b><span id="stMissaLabel">dias com Santa Missa</span></div>
+        <div class="stat"><b id="stAvg">0%</b><span>média diária</span></div>
+        <div class="stat"><b id="stFull">0</b><span>dias completos</span></div>
+        <div class="stat"><b id="stDays">0</b><span>dias com marcação</span></div>
+      </div>
+      <h3>Por norma</h3>
+      <div class="bars" id="bars"></div>
+    </div>
+  </section>
+
+  <!-- ESCOLHER -->
+  <section id="view-escolher" class="group" style="gap:18px" hidden>
+    <div class="card">
+      <h2>Quais normas você vai acompanhar?</h2>
+      <p style="color:var(--muted); font-size:15px">Quem está começando costuma escolher poucas e ir acrescentando com a ajuda da direção espiritual. Só as normas ligadas entram no % do dia.</p>
+      <div class="presets">
+        <button class="btn" type="button" id="presetStart">Para começar</button>
+        <button class="btn" type="button" id="presetAll">Plano completo</button>
+        <button class="btn" type="button" id="presetNone">Desligar todas</button>
+      </div>
+    </div>
+    <div id="pickGroups" class="group" style="gap:18px"></div>
+  </section>
+
+  <!-- DADOS -->
+  <section id="view-dados" class="group" style="gap:18px" hidden>
+    <div class="card">
+      <h2>Seus dados</h2>
+      <p style="color:var(--muted); font-size:15px">As marcações ficam guardadas só neste navegador, neste aparelho. Se você limpar os dados do navegador ou trocar de celular, elas se perdem. De vez em quando, salve um backup: um arquivo .txt no Drive, no iCloud ou no próprio aparelho, ou o texto numa nota ou num e-mail.</p>
+      <div class="actions">
+        <button class="btn primary" type="button" id="saveFile">Salvar arquivo (.txt)</button>
+        <button class="btn" type="button" id="copyBackup">Copiar backup</button>
+      </div>
+      <p style="color:var(--muted); font-size:14px">No celular, «Salvar arquivo» abre o menu de compartilhar: escolha Salvar em Arquivos, Google Drive ou outro app. No computador, o arquivo vai para a pasta de downloads.</p>
+      <textarea id="backupOut" readonly hidden aria-label="Backup em texto"></textarea>
+      <p class="msg" id="copyMsg" aria-live="polite"></p>
+    </div>
+    <div class="card">
+      <h3>Restaurar backup</h3>
+      <p style="font-size:15px; color:var(--muted)">Abra um arquivo de backup ou cole o texto abaixo. O backup substitui tudo o que está salvo agora.</p>
+      <div class="actions">
+        <label class="btn" for="backupFile" style="display:inline-block">Abrir arquivo de backup</label>
+        <input type="file" id="backupFile" accept=".txt,.json,text/plain,application/json" style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none">
+      </div>
+      <label for="backupIn" style="font-size:15px; color:var(--muted)">Ou cole o texto do backup:</label>
+      <textarea id="backupIn" placeholder='{"v":1, ...}'></textarea>
+      <div class="actions"><button class="btn" type="button" id="restore">Restaurar texto colado</button></div>
+      <p class="msg" id="restoreMsg" aria-live="polite"></p>
+    </div>
+    <div class="card">
+      <h3>Apagar tudo</h3>
+      <p style="color:var(--muted); font-size:15px">Apaga todas as marcações e volta às normas padrão.</p>
+      <div class="actions"><button class="btn danger" type="button" id="wipe">Apagar todos os dados</button></div>
+    </div>
+  </section>
+
+  <footer>
+    <blockquote>«Não devem converter-se em normas rígidas, numa espécie de compartimentos estanques.»</blockquote>
+    <span>São Josemaria, <i>Amigos de Deus</i>, 149</span>
+    <span>Fontes: <a href="https://opusdei.org/pt-br/article/plano-de-vida-opus-dei-dicionario-sao-josemaria/">Plano de vida (Dicionário de São Josemaria)</a> · <a href="https://opusdei.org/pt-br/article/o-que-e-o-plano-de-vida/">As normas de piedade do plano de vida</a> · <a href="https://opusdei.org/pt-pt/article/que-posso-dizer-a-jesus-depois-da-comunhao/">Orações para a ação de graças</a></span>
+  </footer>
+</div>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-backdrop" data-close></div>
+  <div class="sheet-panel">
+    <div class="sheet-head">
+      <h2 id="sheetTitle">Orações</h2>
+      <button class="iconbtn" type="button" id="sheetClose" data-close aria-label="Fechar">×</button>
+    </div>
+    <div class="sheet-jump" id="sheetJump"></div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Conteúdo ----------
+  var GROUPS = ["Ao acordar","Manhã","Meio-dia","Ao longo do dia","Tarde","À noite"];
+  var NORMAS = [
+    {id:"minuto", g:"Ao acordar", name:"Minuto heroico", when:"Ao acordar",
+     desc:"Levantar na hora marcada, sem negociar com o travesseiro. É a primeira vitória do dia, oferecida a Deus."},
+    {id:"oferecimento", g:"Ao acordar", name:"Oferecimento de obras", when:"Ao acordar", prayers:"oferecimento",
+     desc:"Oferecer a Deus o dia inteiro: trabalho, alegrias e contrariedades. Pode ser um simples «Serviam!» ou uma oração curta."},
+    {id:"oracaoManha", g:"Manhã", name:"Oração mental", when:"Manhã",
+     desc:"Conversa pessoal com Deus, de preferência diante do Sacrário. Comece com 10 a 15 minutos; os membros da Obra fazem meia hora."},
+    {id:"missa", g:"Manhã", name:"Santa Missa", when:"Diária, se possível",
+     desc:"Centro e raiz da vida espiritual do cristão. Participar com atenção, unindo o próprio trabalho ao Sacrifício de Cristo."},
+    {id:"comunhao", g:"Manhã", name:"Comunhão", when:"Na Missa",
+     desc:"Receber Jesus em estado de graça, bem preparado e com desejo."},
+    {id:"acaoGracas", g:"Manhã", name:"Ação de graças", when:"Depois da Missa", prayers:"acaoGracas",
+     desc:"Uns 10 minutos de oração íntima e em silêncio com Jesus presente em você. Ajudam a Alma de Cristo e as orações de São Tomás e de Santo Inácio."},
+    {id:"angelus", g:"Meio-dia", name:"Angelus", when:"Meio-dia",
+     desc:"Recordar a Encarnação com Nossa Senhora. No tempo pascal, reza-se o Regina Coeli."},
+    {id:"evangelho", g:"Ao longo do dia", name:"Leitura do Evangelho", when:"Alguns minutos",
+     desc:"Ler um trecho do Evangelho e entrar na cena como mais um personagem."},
+    {id:"leitura", g:"Ao longo do dia", name:"Leitura espiritual", when:"10 a 15 minutos",
+     desc:"Um bom livro de espiritualidade, como Caminho, Sulco ou Forja, lido aos poucos."},
+    {id:"visita", g:"Ao longo do dia", name:"Visita ao Santíssimo", when:"Alguns minutos",
+     desc:"Passar diante do Sacrário para cumprimentar Jesus, mesmo que seja no caminho do trabalho."},
+    {id:"terco", g:"Ao longo do dia", name:"Terço", when:"Qualquer momento",
+     desc:"Contemplar os mistérios da vida de Cristo com Maria. Pode ser rezado no trânsito ou caminhando."},
+    {id:"salve", g:"Ao longo do dia", name:"Salve Rainha", when:"Só aos sábados", onlySat:true,
+     desc:"Homenagem semanal a Nossa Senhora. Aparece aqui apenas nos sábados."},
+    {id:"preces", g:"Ao longo do dia", name:"Preces", when:"Membros da Obra",
+     desc:"Orações curtas tiradas da liturgia e da Escritura, pelas necessidades da Igreja e do Opus Dei."},
+    {id:"jaculatorias", g:"Ao longo do dia", name:"Jaculatórias e comunhões espirituais", when:"O dia todo",
+     desc:"Orações breves e desejos de receber Jesus, para viver na presença de Deus no meio do trabalho."},
+    {id:"oracaoTarde", g:"Tarde", name:"Oração mental", when:"Tarde",
+     desc:"Segundo tempo de oração pessoal, nos mesmos moldes da manhã."},
+    {id:"exame", g:"À noite", name:"Exame de consciência", when:"Antes de deitar",
+     desc:"Poucos minutos para agradecer, ver o dia diante de Deus, pedir perdão e fazer um propósito concreto para amanhã."},
+    {id:"aveMarias", g:"À noite", name:"Três Ave-Marias", when:"Antes de dormir",
+     desc:"Pedir à Virgem a pureza de coração."}
+  ];
+  var PERIODICAS = [
+    {id:"confissao", p:"w", name:"Confissão", when:"Nesta semana",
+     desc:"Receber o sacramento da Penitência com frequência, mesmo sem pecado grave. Muitos se confessam toda semana."},
+    {id:"recolhimento", p:"m", name:"Recolhimento mensal", when:"Neste mês",
+     desc:"Algumas horas de oração e reflexão para rever o rumo da vida espiritual."},
+    {id:"retiro", p:"y", name:"Retiro anual", when:"Neste ano",
+     desc:"Alguns dias dedicados só a Deus, em silêncio."}
+  ];
+  var PRAYERS = {
+    acaoGracas: {
+      title: "Ação de graças",
+      intro: "Depois da Comunhão, Jesus está presente em você. Use uns 10 minutos para agradecer em silêncio. Estas orações antigas da Igreja ajudam a começar; depois, converse com Ele com as suas palavras.",
+      items: [
+        {id:"alma", name:"Alma de Cristo", note:"Século XIV. Curta e fácil de decorar.",
+         text:["Alma de Cristo, santificai-me.","Corpo de Cristo, salvai-me.","Sangue de Cristo, inebriai-me.","Água do lado de Cristo, lavai-me.","Paixão de Cristo, confortai-me.","Ó bom Jesus, ouvi-me.","Dentro das vossas chagas, escondei-me.","Não permitais que eu me separe de vós.","Do espírito maligno, defendei-me.","Na hora da minha morte, chamai-me","e mandai-me ir para vós,","para que com os vossos santos vos louve","por todos os séculos dos séculos. Amém."]},
+        {id:"tomas", name:"Oração de São Tomás de Aquino", note:"Agradece a Comunhão recebida por misericórdia e pede que ela traga o perdão, fortaleça a fé e as virtudes e una a Deus. Tradução livre.",
+         text:["Eu vos dou graças, Senhor santo, Pai todo-poderoso, Deus eterno, porque a mim, pecador e servo indigno, sem nenhum mérito meu, mas só pela vossa misericórdia, vos dignastes alimentar com o precioso Corpo e Sangue do vosso Filho, Nosso Senhor Jesus Cristo.","Peço-vos que esta Comunhão não seja para mim motivo de condenação, mas caminho para o perdão. Seja para mim armadura da fé e escudo da boa vontade; que acabe com os meus vícios e maus desejos; que aumente em mim a caridade, a paciência, a humildade, a obediência e todas as virtudes; que me defenda contra todos os inimigos, visíveis e invisíveis; que acalme todos os meus impulsos, da carne e do espírito; que me una firmemente a vós, único Deus verdadeiro, e me leve a um bom fim.","E dignai-vos conduzir-me, pecador, àquele banquete inefável onde vós, com o vosso Filho e o Espírito Santo, sois para os vossos santos luz verdadeira, saciedade plena, alegria eterna e felicidade perfeita. Por Cristo, Nosso Senhor. Amém."]},
+        {id:"inacio", name:"Tomai, Senhor, e recebei", note:"Santo Inácio de Loyola. Uma entrega total: liberdade, memória, entendimento e vontade.",
+         text:["Tomai, Senhor, e recebei toda a minha liberdade, a minha memória, o meu entendimento e toda a minha vontade, tudo o que tenho e possuo.","Vós mo destes; a vós, Senhor, o restituo. Tudo é vosso: disponde de tudo segundo a vossa vontade.","Dai-me o vosso amor e a vossa graça, que isso me basta."]}
+      ],
+      tipsTitle: "Para a conversa pessoal",
+      tips: [
+        "Em «É Cristo que passa» (nn. 92-93), São Josemaria apresenta Cristo como Rei que reina nos corações, Médico que cura o egoísmo, Mestre do amor a Deus e aos homens e Amigo que dá a vida pelos seus. Escolha uma dessas imagens e converse com Ele a partir dela.",
+        "Ele mesmo dividia o dia em duas metades: a primeira para agradecer a Comunhão daquele dia e a segunda para se preparar para a do dia seguinte."
+      ],
+      src: [["Que posso dizer a Jesus depois da comunhão?","https://opusdei.org/pt-pt/article/que-posso-dizer-a-jesus-depois-da-comunhao/"],["Punha todo o amor de que era capaz","https://opusdei.org/pt-br/article/punha-todo-o-amor-de-que-era-capaz/"]]
+    },
+    oferecimento: {
+      title: "Oferecimento de obras",
+      intro: "Logo ao acordar, antes de qualquer outra preocupação, ofereça a Deus o dia inteiro. Escolha uma destas orações ou vá alternando.",
+      items: [
+        {id:"serviam", name:"Serviam!", note:"Quer dizer «Servirei!». Ao acordar, São Josemaria pulava da cama, beijava o chão e dizia «Serviam!» com força. É a resposta ao «non serviam» (não servirei), a revolta contra Deus.",
+         text:["(Sinal da cruz)","Serviam!"]},
+        {id:"obras", name:"Oferecimento de obras", note:"A fórmula usada no Opus Dei.",
+         text:["Todos os meus pensamentos, todas as minhas palavras e todas as obras deste dia, eu vo-los ofereço, Senhor, e a minha vida inteira, por amor."]},
+        {id:"senhora", name:"Ó Senhora minha", note:"A oração que São Josemaria aprendeu com a mãe. Ele a rezava de manhã e à noite, enquanto se vestia ou fazia a barba.",
+         text:["Ó Senhora minha, ó minha Mãe, eu me ofereço todo a vós.","E, em prova da minha devoção, eu vos consagro neste dia os meus olhos, os meus ouvidos, a minha boca, o meu coração e inteiramente todo o meu ser.","E porque assim sou vosso, ó incomparável Mãe, guardai-me e defendei-me como coisa e propriedade vossa. Amém."]},
+        {id:"coracao", name:"Ao Sagrado Coração", note:"O oferecimento clássico do Apostolado da Oração.",
+         text:["Divino Coração de Jesus, eu vos ofereço, pelo Coração Imaculado de Maria, as orações, obras e sofrimentos deste dia, em reparação das ofensas que vos são feitas e por todas as intenções pelas quais continuamente vos ofereceis no altar.","Eu vo-los ofereço, em particular, pelas intenções do Santo Padre. Amém."]},
+        {id:"pessoal", name:"Com as suas palavras", note:"Um oferecimento pessoal, citando o que o dia vai trazer. Use este como modelo.",
+         text:["Senhor, este dia é teu. Ofereço-te as reuniões, as decisões difíceis, os e-mails, o cansaço e as alegrias que vierem. Que eu trabalhe bem, por amor a ti, e trate bem cada pessoa que encontrar. Serviam!"]}
+      ],
+      tipsTitle: "Para viver bem esta norma",
+      tips: [
+        "Renove durante o dia com pequenos oferecimentos, como «Jesus, ofereço-te esta hora de trabalho».",
+        "Se a manhã começou mal, por exemplo por preguiça, peça ajuda ao Senhor e, à noite, faça um ato de contrição para recomeçar no dia seguinte."
+      ],
+      src: [["Uma oferenda agradável a Deus: o oferecimento de obras e o «serviam!»","https://opusdei.org/pt-pt/article/uma-oferenda-agradavel-a-deus-o-oferecimento-de-obras-e-o-serviam/"]]
+    }
+  };
+  var BOOK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>';
+
+  var ALL_IDS = NORMAS.map(function(n){return n.id;}).concat(PERIODICAS.map(function(p){return p.id;}));
+  var DEFAULT_SEL = ALL_IDS.filter(function(id){return id !== "preces";});
+  var START_SEL = ["oferecimento","oracaoManha","terco","jaculatorias","exame","aveMarias","salve","confissao","recolhimento","retiro"];
+
+  var MESES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  var DIAS = ["domingo","segunda-feira","terça-feira","quarta-feira","quinta-feira","sexta-feira","sábado"];
+  var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="var(--surface)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+  // ---------- Armazenamento ----------
+  var KEY = "planoDeVida.v1";
+  var storageOK = true;
+  try { localStorage.setItem(KEY+".t","1"); localStorage.removeItem(KEY+".t"); } catch(e){ storageOK = false; }
+
+  function freshState(){ return {v:1, selected:DEFAULT_SEL.slice(), days:{}, periods:{}, welcomed:false}; }
+
+  function sanitize(obj){
+    if (!obj || typeof obj !== "object") return null;
+    var s = freshState();
+    if (Array.isArray(obj.selected)) s.selected = obj.selected.filter(function(id){return ALL_IDS.indexOf(id) >= 0;});
+    s.welcomed = !!obj.welcomed;
+    var dayRe = /^\d{4}-\d{2}-\d{2}$/, perRe = /^(w:\d{4}-\d{2}-\d{2}|m:\d{4}-\d{2}|y:\d{4})$/;
+    function copyMap(src, re){
+      var out = {};
+      if (!src || typeof src !== "object") return out;
+      Object.keys(src).forEach(function(k){
+        if (!re.test(k) || !src[k] || typeof src[k] !== "object") return;
+        var inner = {};
+        Object.keys(src[k]).forEach(function(id){ if (ALL_IDS.indexOf(id) >= 0 && src[k][id] === true) inner[id] = true; });
+        if (Object.keys(inner).length) out[k] = inner;
+      });
+      return out;
+    }
+    s.days = copyMap(obj.days, dayRe);
+    s.periods = copyMap(obj.periods, perRe);
+    return s;
+  }
+
+  function load(){
+    if (!storageOK) return null;
+    try { var raw = localStorage.getItem(KEY); return raw ? sanitize(JSON.parse(raw)) : null; }
+    catch(e){ return null; }
+  }
+  function save(){
+    if (!storageOK) return;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch(e){ storageOK = false; showStorageBanner(); }
+  }
+  var state = load() || freshState();
+
+  // ---------- Datas ----------
+  function pad(n){ return (n < 10 ? "0" : "") + n; }
+  function dkey(d){ return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()); }
+  function parse(k){ var a = k.split("-").map(Number); return new Date(a[0], a[1]-1, a[2]); }
+  function addDays(d, n){ var x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate()+n); return x; }
+  function today(){ var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+  function weekStart(d){ return addDays(d, -d.getDay()); }
+  function periodKey(p, d){
+    if (p === "w") return "w:" + dkey(weekStart(d));
+    if (p === "m") return "m:" + d.getFullYear() + "-" + pad(d.getMonth()+1);
+    return "y:" + d.getFullYear();
+  }
+  function periodLabel(p, d){
+    if (p === "w"){
+      var a = weekStart(d), b = addDays(a, 6);
+      return "Semana de " + pad(a.getDate()) + "/" + pad(a.getMonth()+1) + " a " + pad(b.getDate()) + "/" + pad(b.getMonth()+1);
+    }
+    if (p === "m") return cap(MESES[d.getMonth()]) + " de " + d.getFullYear();
+    return "Ano de " + d.getFullYear();
+  }
+  function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  // ---------- Cálculos ----------
+  function isSel(id){ return state.selected.indexOf(id) >= 0; }
+  function applies(n, d){ return n.onlySat ? d.getDay() === 6 : true; }
+  function dayStats(k){
+    var d = parse(k), rec = state.days[k] || {};
+    var list = NORMAS.filter(function(n){ return isSel(n.id) && applies(n, d); });
+    var done = list.filter(function(n){ return rec[n.id]; }).length;
+    return {done:done, total:list.length, pct: list.length ? done/list.length : 0};
+  }
+  function streak(){
+    var d = today(), s = dayStats(dkey(d)), count = 0;
+    if (!(s.total && s.done === s.total)) d = addDays(d, -1);
+    for (var i = 0; i < 3650; i++){
+      s = dayStats(dkey(d));
+      if (s.total && s.done === s.total){ count++; d = addDays(d, -1); } else break;
+    }
+    return count;
+  }
+
+  // ---------- Estado da tela ----------
+  var current = today();
+  var calMonth = new Date(current.getFullYear(), current.getMonth(), 1);
+
+  // ---------- Dia ----------
+  function itemHTML(n, checked, prefix){
+    var id = prefix + n.id;
+    return '<label class="item" for="' + id + '">' +
+      '<input type="checkbox" id="' + id + '" data-id="' + n.id + '"' + (checked ? " checked" : "") + '>' +
+      '<span class="box">' + CHECK + '</span>' +
+      '<span class="txt"><span class="row"><span class="name">' + n.name + '</span><span class="when">' + n.when + '</span></span>' +
+      '<span class="desc">' + n.desc + '</span>' + prayerBtn(n) + '</span></label>';
+  }
+  function prayerBtn(n){
+    if (!n.prayers) return "";
+    var c = PRAYERS[n.prayers].items.length;
+    return '<button type="button" class="prayerbtn" data-prayers="' + n.prayers + '">' + BOOK + 'Ver ' + (c === 1 ? "oração" : "as " + c + " orações") + '</button>';
+  }
+
+  // ---------- Folha de orações ----------
+  var lastFocus = null;
+  function openPrayers(key){
+    var P = PRAYERS[key]; if (!P) return;
+    lastFocus = document.activeElement;
+    document.getElementById("sheetTitle").textContent = P.title;
+    document.getElementById("sheetJump").innerHTML = P.items.map(function(it){
+      return '<button type="button" data-jump="pr-' + it.id + '">' + it.name + '</button>';
+    }).join("");
+    var html = '<p class="intro">' + P.intro + '</p>';
+    html += P.items.map(function(it){
+      return '<section class="prayer" id="pr-' + it.id + '"><span class="pname">' + it.name + '</span>' +
+        (it.note ? '<p class="pnote">' + it.note + '</p>' : '') +
+        '<blockquote>' + it.text.join(it.text.length > 4 ? "<br>" : "<br><br>") + '</blockquote></section>';
+    }).join("");
+    html += '<div class="tips"><h3>' + P.tipsTitle + '</h3><ul>' + P.tips.map(function(t){ return '<li>' + t + '</li>'; }).join("") + '</ul></div>';
+    html += '<p class="sheet-src">Fonte: ' + P.src.map(function(s){ return '<a href="' + s[1] + '" target="_blank" rel="noopener">' + s[0] + '</a>'; }).join(" · ") + '</p>';
+    var body = document.getElementById("sheetBody");
+    body.innerHTML = html; body.scrollTop = 0;
+    document.getElementById("sheet").hidden = false;
+    document.body.style.overflow = "hidden";
+    document.getElementById("sheetClose").focus();
+  }
+  function closePrayers(){
+    document.getElementById("sheet").hidden = true;
+    document.body.style.overflow = "";
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  document.addEventListener("click", function(e){
+    var pb = e.target.closest("[data-prayers]");
+    if (pb){ e.preventDefault(); e.stopPropagation(); openPrayers(pb.dataset.prayers); return; }
+    if (e.target.closest("[data-close]")){ closePrayers(); return; }
+    var j = e.target.closest("[data-jump]");
+    if (j){ var t = document.getElementById(j.dataset.jump); if (t) t.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"}); }
+  }, true);
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && !document.getElementById("sheet").hidden) closePrayers();
+  });
+
+  function renderDay(){
+    var k = dkey(current), rec = state.days[k] || {}, t = today();
+    var isToday = k === dkey(t);
+    var title = isToday ? "Hoje" : cap(DIAS[current.getDay()]);
+    var sub = (isToday ? DIAS[current.getDay()] + ", " : "") + current.getDate() + " de " + MESES[current.getMonth()] +
+      (current.getFullYear() !== t.getFullYear() ? " de " + current.getFullYear() : "");
+    document.getElementById("dateTitle").textContent = title;
+    document.getElementById("dateSub").textContent = sub;
+    document.getElementById("nextDay").disabled = current >= t;
+    document.getElementById("goToday").hidden = isToday;
+
+    var html = "";
+    GROUPS.forEach(function(g){
+      var items = NORMAS.filter(function(n){ return n.g === g && isSel(n.id) && applies(n, current); });
+      if (!items.length) return;
+      html += '<div class="group"><h3>' + g + '</h3><div class="list">' +
+        items.map(function(n){ return itemHTML(n, !!rec[n.id], "d-"); }).join("") + '</div></div>';
+    });
+    if (!html){
+      html = '<div class="empty"><p>Nenhuma norma diária escolhida.</p><button class="btn primary" type="button" data-goto="escolher">Escolher normas</button></div>';
+    }
+    document.getElementById("dailyGroups").innerHTML = html;
+
+    var per = PERIODICAS.filter(function(p){ return isSel(p.id); });
+    var phtml = "";
+    if (per.length){
+      phtml = '<h3>Semana, mês e ano</h3><div class="list">' + per.map(function(p){
+        var pk = periodKey(p.p, current), checked = !!(state.periods[pk] && state.periods[pk][p.id]);
+        return itemHTML({id:p.id, name:p.name, when:periodLabel(p.p, current), desc:p.desc}, checked, "p-");
+      }).join("") + '</div>';
+    }
+    document.getElementById("periodicGroup").innerHTML = phtml;
+    updateSummary();
+  }
+
+  function updateSummary(){
+    var s = dayStats(dkey(current));
+    var pct = Math.round(s.pct * 100);
+    document.getElementById("pctNum").textContent = pct + "%";
+    var arc = document.getElementById("ringArc");
+    arc.setAttribute("stroke-dashoffset", (263.9 * (1 - s.pct)).toFixed(1));
+    arc.setAttribute("stroke", s.total && s.done === s.total ? "var(--gold)" : "var(--accent)");
+    document.getElementById("countChip").textContent = s.done + " de " + s.total + (s.total === 1 ? " norma" : " normas");
+    var st = streak();
+    document.getElementById("streakChip").textContent = st + (st === 1 ? " dia completo seguido" : " dias completos seguidos");
+  }
+
+  document.getElementById("dailyGroups").addEventListener("change", function(e){
+    var cb = e.target; if (!cb.dataset || !cb.dataset.id) return;
+    var k = dkey(current);
+    if (!state.days[k]) state.days[k] = {};
+    if (cb.checked) state.days[k][cb.dataset.id] = true; else delete state.days[k][cb.dataset.id];
+    if (!Object.keys(state.days[k]).length) delete state.days[k];
+    save(); updateSummary();
+  });
+  document.getElementById("periodicGroup").addEventListener("change", function(e){
+    var cb = e.target; if (!cb.dataset || !cb.dataset.id) return;
+    var p = PERIODICAS.filter(function(x){ return x.id === cb.dataset.id; })[0];
+    var pk = periodKey(p.p, current);
+    if (!state.periods[pk]) state.periods[pk] = {};
+    if (cb.checked) state.periods[pk][p.id] = true; else delete state.periods[pk][p.id];
+    if (!Object.keys(state.periods[pk]).length) delete state.periods[pk];
+    save();
+  });
+  document.getElementById("prevDay").addEventListener("click", function(){ current = addDays(current, -1); renderDay(); });
+  document.getElementById("nextDay").addEventListener("click", function(){ if (current < today()){ current = addDays(current, 1); renderDay(); } });
+  document.getElementById("goToday").addEventListener("click", function(){ current = today(); renderDay(); });
+
+  // ---------- Histórico ----------
+  function renderHistory(){
+    var y = calMonth.getFullYear(), m = calMonth.getMonth(), t = today();
+    document.getElementById("monthTitle").textContent = cap(MESES[m]) + " de " + y;
+    document.getElementById("nextMonth").disabled = (y > t.getFullYear()) || (y === t.getFullYear() && m >= t.getMonth());
+    var first = new Date(y, m, 1), daysIn = new Date(y, m+1, 0).getDate();
+    var html = ["D","S","T","Q","Q","S","S"].map(function(w){ return '<div class="wd">' + w + '</div>'; }).join("");
+    for (var b = 0; b < first.getDay(); b++) html += '<div class="blank"></div>';
+    var sum = 0, counted = 0, full = 0, marked = 0, missas = 0;
+    var missaOn = isSel("missa");
+    for (var d = 1; d <= daysIn; d++){
+      var dt = new Date(y, m, d), k = dkey(dt), future = dt > t;
+      var s = dayStats(k), cls = "", hadMissa = false;
+      if (!future){
+        counted++; sum += s.pct;
+        if (state.days[k]) marked++;
+        if (missaOn && state.days[k] && state.days[k].missa){ hadMissa = true; missas++; }
+        if (s.total && s.done === s.total){ cls = "full"; full++; }
+        else if (s.pct > 2/3) cls = "l3";
+        else if (s.pct > 1/3) cls = "l2";
+        else if (s.pct > 0) cls = "l1";
+      } else cls = "future";
+      if (hadMissa) cls += " missa";
+      if (k === dkey(t)) cls += " today";
+      var label = d + " de " + MESES[m] + (future ? "" : ": " + Math.round(s.pct*100) + "%") + (hadMissa ? ", com Santa Missa" : "");
+      html += '<button type="button" class="' + cls.trim() + '" data-day="' + k + '" aria-label="' + label + '"' + (future ? " disabled" : "") + '>' + d + '</button>';
+    }
+    document.getElementById("cal").innerHTML = html;
+    document.getElementById("stAvg").textContent = (counted ? Math.round(sum/counted*100) : 0) + "%";
+    document.getElementById("stFull").textContent = full;
+    document.getElementById("stDays").textContent = marked;
+    document.getElementById("stMissaTile").hidden = !missaOn;
+    document.getElementById("legendMissa").hidden = !missaOn;
+    document.getElementById("stMissa").textContent = missas + (counted ? "/" + counted : "");
+    document.getElementById("stMissaLabel").textContent = missas === 1 ? "dia com Santa Missa" : "dias com Santa Missa";
+
+    var rows = NORMAS.filter(function(n){ return isSel(n.id); }).map(function(n){
+      var poss = 0, done = 0;
+      for (var d = 1; d <= daysIn; d++){
+        var dt = new Date(y, m, d); if (dt > t) break;
+        if (!applies(n, dt)) continue;
+        poss++; var r = state.days[dkey(dt)]; if (r && r[n.id]) done++;
+      }
+      return {n:n, poss:poss, done:done};
+    }).filter(function(r){ return r.poss > 0; });
+    document.getElementById("bars").innerHTML = rows.length ? rows.map(function(r){
+      var p = Math.round(r.done / r.poss * 100);
+      var label = r.n.name + (r.n.id === "oracaoManha" ? " (manhã)" : r.n.id === "oracaoTarde" ? " (tarde)" : "");
+      return '<div class="bar"><span>' + label + '</span><span class="n">' + r.done + '/' + r.poss + '</span>' +
+        '<div class="meter"><i class="' + (p === 100 ? "full" : "") + '" style="width:' + p + '%' + (r.n.id === "missa" && p < 100 ? ';background:var(--wine)' : '') + '"></i></div></div>';
+    }).join("") : '<p style="color:var(--muted); font-size:14px">Nenhuma norma diária escolhida.</p>';
+  }
+  document.getElementById("cal").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-day]"); if (!b || b.disabled) return;
+    current = parse(b.dataset.day); show("hoje");
+  });
+  document.getElementById("prevMonth").addEventListener("click", function(){ calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()-1, 1); renderHistory(); });
+  document.getElementById("nextMonth").addEventListener("click", function(){ calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()+1, 1); renderHistory(); });
+
+  // ---------- Escolher ----------
+  function pickHTML(n){
+    var id = "s-" + n.id;
+    return '<label class="pick" for="' + id + '"><span class="txt" style="display:flex;flex-direction:column;gap:2px">' +
+      '<span class="row" style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap"><span style="font-weight:600">' + n.name + '</span>' +
+      '<span style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">' + n.when + '</span></span>' +
+      '<span style="font-size:14.5px;color:var(--muted)">' + n.desc + '</span>' + prayerBtn(n) + '</span>' +
+      '<span class="switch"><input type="checkbox" id="' + id + '" data-id="' + n.id + '"' + (isSel(n.id) ? " checked" : "") + '><span class="track"></span></span></label>';
+  }
+  function renderPick(){
+    var html = "";
+    GROUPS.forEach(function(g){
+      var items = NORMAS.filter(function(n){ return n.g === g; });
+      html += '<div class="group"><h3>' + g + '</h3><div class="list">' + items.map(pickHTML).join("") + '</div></div>';
+    });
+    html += '<div class="group"><h3>Semana, mês e ano</h3><div class="list">' +
+      PERIODICAS.map(function(p){ return pickHTML({id:p.id, name:p.name, when:{w:"Semanal", m:"Mensal", y:"Anual"}[p.p], desc:p.desc}); }).join("") + '</div></div>';
+    document.getElementById("pickGroups").innerHTML = html;
+  }
+  document.getElementById("pickGroups").addEventListener("change", function(e){
+    var cb = e.target; if (!cb.dataset || !cb.dataset.id) return;
+    var id = cb.dataset.id, i = state.selected.indexOf(id);
+    if (cb.checked && i < 0) state.selected.push(id);
+    if (!cb.checked && i >= 0) state.selected.splice(i, 1);
+    save();
+  });
+  function preset(list){ state.selected = list.slice(); save(); renderPick(); }
+  document.getElementById("presetStart").addEventListener("click", function(){ preset(START_SEL); });
+  document.getElementById("presetAll").addEventListener("click", function(){ preset(ALL_IDS); });
+  document.getElementById("presetNone").addEventListener("click", function(){ preset([]); });
+
+  // ---------- Dados ----------
+  function backupText(){ return JSON.stringify(state); }
+  // Dentro do visualizador do Claude, salvar arquivos passa pela capacidade "downloads".
+  // Fora dele (ex.: GitHub Pages), window.claude não existe e o download é direto.
+  var dlNS = null;
+  try {
+    if (window.claude && typeof window.claude.use === "function"){
+      window.claude.use("downloads").then(function(n){ dlNS = n; }, function(){});
+    }
+  } catch(e){}
+  document.getElementById("copyBackup").addEventListener("click", function(){
+    var txt = backupText(), out = document.getElementById("backupOut"), msg = document.getElementById("copyMsg");
+    out.value = txt; msg.className = "msg";
+    function fallback(){
+      out.hidden = false; out.focus(); out.select();
+      msg.textContent = "Não deu para copiar sozinho. Selecione o texto acima e copie.";
+    }
+    try {
+      navigator.clipboard.writeText(txt).then(function(){
+        out.hidden = true; msg.textContent = "Backup copiado. Cole numa nota ou num e-mail para você.";
+      }, fallback);
+    } catch(e){ fallback(); }
+  });
+  document.getElementById("saveFile").addEventListener("click", function(){
+    var msg = document.getElementById("copyMsg"), txt = backupText();
+    var name = "plano-de-vida-backup-" + dkey(today()) + ".txt";
+    var framed = false;
+    try { framed = window.self !== window.top; } catch(e){ framed = true; }
+    msg.className = "msg";
+    function download(){
+      try {
+        var blob = new Blob([txt], {type:"text/plain;charset=utf-8"});
+        var url = URL.createObjectURL(blob), a = document.createElement("a");
+        a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
+        msg.textContent = framed
+          ? "Se nenhum arquivo foi salvo, esta visualização não permite downloads. Use «Copiar backup»."
+          : "Arquivo " + name + " salvo na pasta de downloads.";
+      } catch(e){
+        msg.className = "msg err"; msg.textContent = "Não deu para salvar o arquivo. Use «Copiar backup».";
+      }
+    }
+    if (dlNS){
+      dlNS.save({filename:name, data:txt}).then(function(){
+        msg.textContent = "Arquivo " + name + " salvo.";
+      }, function(err){
+        var code = err && err.code;
+        if (code === "declined"){ msg.textContent = "Salvamento cancelado."; return; }
+        if (code === "rate_limited"){ msg.textContent = "Já há uma confirmação aberta. Responda a ela ou tente de novo em instantes."; return; }
+        msg.className = "msg err"; msg.textContent = "Não deu para salvar o arquivo aqui. Use «Copiar backup».";
+      });
+      return;
+    }
+    var mobile = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+    var file = null;
+    try { file = new File([txt], name, {type:"text/plain"}); } catch(e){ file = null; }
+    if (mobile && file && navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:"Backup do Plano de Vida"}).then(function(){
+        msg.textContent = "Arquivo " + name + " enviado. Confira se ele ficou na pasta que você escolheu.";
+      }, function(err){
+        if (err && err.name === "AbortError"){ msg.textContent = "Salvamento cancelado."; return; }
+        download();
+      });
+      return;
+    }
+    download();
+  });
+
+  function restoreFrom(raw, msg, how){
+    var s = null;
+    try { s = sanitize(JSON.parse(String(raw).trim())); } catch(e){ s = null; }
+    if (!s){
+      msg.className = "msg err";
+      msg.textContent = how === "file" ? "Esse arquivo não é um backup do Plano de Vida." : "Esse texto não é um backup válido. Cole o texto inteiro que você copiou.";
+      return false;
+    }
+    s.welcomed = true; state = s; save();
+    var nd = Object.keys(state.days).length;
+    msg.className = "msg"; msg.textContent = "Backup restaurado: " + nd + (nd === 1 ? " dia" : " dias") + " com marcação.";
+    renderAll();
+    return true;
+  }
+  document.getElementById("restore").addEventListener("click", function(){
+    var msg = document.getElementById("restoreMsg");
+    if (restoreFrom(document.getElementById("backupIn").value, msg, "text")) document.getElementById("backupIn").value = "";
+  });
+  document.getElementById("backupFile").addEventListener("change", function(){
+    var input = this, f = input.files && input.files[0], msg = document.getElementById("restoreMsg");
+    if (!f) return;
+    if (f.size > 5 * 1024 * 1024){ msg.className = "msg err"; msg.textContent = "Arquivo grande demais para ser um backup."; input.value = ""; return; }
+    var reader = new FileReader();
+    reader.onload = function(){ restoreFrom(reader.result, msg, "file"); input.value = ""; };
+    reader.onerror = function(){ msg.className = "msg err"; msg.textContent = "Não deu para ler o arquivo."; input.value = ""; };
+    reader.readAsText(f);
+  });
+  var wipeTimer = null;
+  document.getElementById("wipe").addEventListener("click", function(){
+    var b = this;
+    if (!b.classList.contains("armed")){
+      b.classList.add("armed"); b.textContent = "Toque de novo para confirmar";
+      wipeTimer = setTimeout(function(){ b.classList.remove("armed"); b.textContent = "Apagar todos os dados"; }, 4000);
+      return;
+    }
+    clearTimeout(wipeTimer);
+    state = freshState(); state.welcomed = true; save();
+    b.classList.remove("armed"); b.textContent = "Dados apagados";
+    setTimeout(function(){ b.textContent = "Apagar todos os dados"; }, 2500);
+    renderAll();
+  });
+
+  // ---------- Navegação ----------
+  var VIEWS = ["hoje","historico","escolher","dados"];
+  function show(v){
+    VIEWS.forEach(function(name){
+      document.getElementById("view-" + name).hidden = name !== v;
+      document.getElementById("tab-" + name).setAttribute("aria-selected", name === v ? "true" : "false");
+    });
+    if (v === "hoje") renderDay();
+    if (v === "historico"){ calMonth = new Date(current.getFullYear(), current.getMonth(), 1); renderHistory(); }
+    if (v === "escolher") renderPick();
+  }
+  document.querySelector("nav.tabs").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-view]"); if (b) show(b.dataset.view);
+  });
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-goto]"); if (b) show(b.dataset.goto);
+  });
+
+  function showStorageBanner(){ document.getElementById("storageBanner").hidden = storageOK; }
+  function renderAll(){
+    showStorageBanner();
+    document.getElementById("welcome").hidden = state.welcomed;
+    var active = VIEWS.filter(function(v){ return !document.getElementById("view-" + v).hidden; })[0] || "hoje";
+    show(active);
+  }
+  document.getElementById("welcomeClose").addEventListener("click", function(){
+    state.welcomed = true; save(); document.getElementById("welcome").hidden = true;
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
