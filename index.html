@@ -818,7 +818,8 @@ footer a{color:var(--accent)}
     var file = null;
     try { file = new File([txt], name, {type:"text/plain"}); } catch(e){ file = null; }
     if (mobile && file && navigator.canShare && navigator.canShare({files:[file]})){
-      navigator.share({files:[file], title:"Backup do Plano de Vida"}).then(function(){
+      // Só o arquivo: um "title" ou "text" junto faz alguns apps salvarem um segundo .txt com esse texto.
+      navigator.share({files:[file]}).then(function(){
         msg.textContent = "Arquivo " + name + " enviado. Confira se ele ficou na pasta que você escolheu.";
       }, function(err){
         if (err && err.name === "AbortError"){ msg.textContent = "Salvamento cancelado."; return; }
