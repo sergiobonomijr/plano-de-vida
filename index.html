@@ -83,6 +83,7 @@ button:focus-visible, input:focus-visible + .box, textarea:focus-visible, .switc
 .chips{display:flex; flex-wrap:wrap; gap:6px}
 .chip{font-size:13px; font-weight:600; padding:3px 10px; border-radius:999px; background:var(--accent-soft); color:var(--accent); font-variant-numeric:tabular-nums}
 .chip.gold{background:var(--gold-soft); color:var(--gold)}
+.chip.wine{background:color-mix(in srgb, var(--wine) 16%, var(--surface)); color:var(--wine)}
 .linkbtn{font:inherit; font-size:14px; font-weight:600; color:var(--accent); background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:3px}
 
 /* Lista de normas */
@@ -185,6 +186,18 @@ button:focus-visible, input:focus-visible + .box, textarea:focus-visible, .switc
 .stat{background:var(--bg); border-radius:12px; padding:10px 12px}
 .stat b{display:block; font-size:24px; font-variant-numeric:tabular-nums; line-height:1.1}
 .stat span{font-size:13px; color:var(--muted)}
+.cal button.ff::before{content:"1ª"; position:absolute; left:4px; bottom:2px; font-size:9.5px; font-weight:700; color:inherit; opacity:.8}
+#ffOn{display:flex; flex-direction:column; gap:12px}
+.ffhead{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.ffbig{font-family:var(--font-display); font-size:58px; font-weight:700; line-height:.9; color:var(--wine); font-variant-numeric:tabular-nums}
+.ffhead span{font-size:16px; font-weight:600}
+.nine{display:grid; grid-template-columns:repeat(9,1fr); gap:4px; max-width:360px}
+.nine i{height:10px; border-radius:999px; background:var(--bg); border:1px solid var(--line)}
+.nine i.on{background:var(--wine); border-color:var(--wine)}
+.ffnote{font-size:14.5px; color:var(--muted); max-width:62ch}
+.ffchips{display:flex; flex-wrap:wrap; gap:6px}
+.ffchip{font-size:13px; font-weight:600; padding:4px 10px; border-radius:999px; background:var(--bg); color:var(--muted); border:1px solid var(--line); font-variant-numeric:tabular-nums}
+.ffchip.ok{background:color-mix(in srgb, var(--wine) 14%, var(--surface)); color:var(--wine); border-color:color-mix(in srgb, var(--wine) 40%, var(--line))}
 .bars{display:flex; flex-direction:column; gap:10px}
 .bar{display:grid; grid-template-columns:1fr auto; gap:4px 10px; font-size:14px}
 .bar .meter{grid-column:1 / -1; height:8px; border-radius:999px; background:var(--bg); overflow:hidden}
@@ -256,6 +269,7 @@ footer a{color:var(--accent)}
         <div class="chips">
           <span class="chip" id="countChip">0 de 0 normas</span>
           <span class="chip gold" id="streakChip">0 dias completos seguidos</span>
+          <span class="chip wine" id="ffChip" hidden>0 primeiras sextas com Missa</span>
         </div>
         <button class="linkbtn" id="goToday" type="button" hidden>Voltar para hoje</button>
       </div>
@@ -281,7 +295,7 @@ footer a{color:var(--accent)}
         <span><i style="background:var(--gold); border-color:var(--gold)"></i>completo</span>
         <span id="legendMissa"><i class="missa"></i>com Santa Missa</span>
       </div>
-      <p style="font-size:14px; color:var(--muted)">Toque num dia para abrir e marcar.</p>
+      <p style="font-size:14px; color:var(--muted)">Toque num dia para abrir e marcar. «1ª» marca a primeira sexta-feira do mês.</p>
     </div>
     <div class="card">
       <h3>Resumo do mês</h3>
@@ -293,6 +307,19 @@ footer a{color:var(--accent)}
       </div>
       <h3>Por norma</h3>
       <div class="bars" id="bars"></div>
+    </div>
+    <div class="card" id="ffCard">
+      <h3>Missa nas primeiras sextas-feiras</h3>
+      <div id="ffOn">
+        <div class="ffhead"><b class="ffbig" id="ffStreak">0</b><span id="ffLabel">primeiras sextas seguidas</span></div>
+        <div class="nine" id="ffNine" aria-hidden="true"></div>
+        <p class="ffnote" id="ffGoal"></p>
+        <div class="ffchips" id="ffRecent"></div>
+        <p class="ffnote" id="ffNext"></p>
+      </div>
+      <div id="ffOff" hidden>
+        <p class="ffnote">Ligue a Santa Missa em <button class="linkbtn" type="button" data-goto="escolher">Escolher</button> para acompanhar as primeiras sextas-feiras.</p>
+      </div>
     </div>
   </section>
 
@@ -648,6 +675,12 @@ footer a{color:var(--accent)}
     document.getElementById("countChip").textContent = s.done + " de " + s.total + (s.total === 1 ? " norma" : " normas");
     var st = streak();
     document.getElementById("streakChip").textContent = st + (st === 1 ? " dia completo seguido" : " dias completos seguidos");
+    var ffChip = document.getElementById("ffChip");
+    ffChip.hidden = !isSel("missa");
+    if (isSel("missa")){
+      var fs = firstFridayStreak();
+      ffChip.textContent = fs + (fs === 1 ? " primeira sexta seguida com Missa" : " primeiras sextas seguidas com Missa");
+    }
   }
 
   document.getElementById("dailyGroups").addEventListener("change", function(e){
@@ -670,6 +703,58 @@ footer a{color:var(--accent)}
   document.getElementById("prevDay").addEventListener("click", function(){ current = addDays(current, -1); renderDay(); });
   document.getElementById("nextDay").addEventListener("click", function(){ if (current < today()){ current = addDays(current, 1); renderDay(); } });
   document.getElementById("goToday").addEventListener("click", function(){ current = today(); renderDay(); });
+
+  // ---------- Primeiras sextas-feiras ----------
+  var MES_CURTO = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  function firstFriday(y, m){
+    var d = new Date(y, m, 1);                       // normaliza meses fora de 0..11
+    return new Date(d.getFullYear(), d.getMonth(), 1 + (5 - d.getDay() + 7) % 7);
+  }
+  function hadMissaOn(d){ var r = state.days[dkey(d)]; return !!(r && r.missa); }
+  // Mês da primeira sexta mais recente que já pode contar: se a deste mês ainda não chegou,
+  // ou é hoje e a Missa ainda não foi marcada, conta-se a partir do mês anterior.
+  function lastCountableFF(){
+    var t = today(), ff = firstFriday(t.getFullYear(), t.getMonth());
+    if (ff > t || (dkey(ff) === dkey(t) && !hadMissaOn(ff))) ff = firstFriday(t.getFullYear(), t.getMonth() - 1);
+    return ff;
+  }
+  function firstFridayStreak(){
+    var ff = lastCountableFF(), n = 0;
+    for (var i = 0; i < 1200; i++){
+      if (!hadMissaOn(ff)) break;
+      n++; ff = firstFriday(ff.getFullYear(), ff.getMonth() - 1);
+    }
+    return n;
+  }
+  function renderFirstFridays(){
+    var on = isSel("missa");
+    document.getElementById("ffOn").hidden = !on;
+    document.getElementById("ffOff").hidden = on;
+    if (!on) return;
+    var n = firstFridayStreak();
+    document.getElementById("ffStreak").textContent = n;
+    document.getElementById("ffLabel").textContent = n === 1 ? "primeira sexta seguida com Missa" : "primeiras sextas seguidas com Missa";
+    var segs = "", lit = n >= 9 ? 9 : n;
+    for (var i = 0; i < 9; i++) segs += '<i class="' + (i < lit ? "on" : "") + '"></i>';
+    document.getElementById("ffNine").innerHTML = segs;
+    document.getElementById("ffGoal").textContent = n >= 9
+      ? "Você completou as nove primeiras sextas-feiras seguidas" + (n > 9 ? " e segue firme: " + n + " meses sem falhar." : ".")
+      : "Faltam " + (9 - n) + " para as nove primeiras sextas-feiras seguidas, a devoção ao Sagrado Coração, que pede a Comunhão nesses dias.";
+
+    var last = lastCountableFF(), list = [];
+    for (var j = 5; j >= 0; j--) list.push(firstFriday(last.getFullYear(), last.getMonth() - j));
+    document.getElementById("ffRecent").innerHTML = list.map(function(d){
+      var ok = hadMissaOn(d);
+      return '<span class="ffchip' + (ok ? " ok" : "") + '" title="' + d.getDate() + ' de ' + MESES[d.getMonth()] + ' de ' + d.getFullYear() + '">' +
+        (ok ? "✓ " : "– ") + pad(d.getDate()) + " " + MES_CURTO[d.getMonth()] + (d.getFullYear() !== today().getFullYear() ? "/" + String(d.getFullYear()).slice(2) : "") + '</span>';
+    }).join("");
+
+    var t = today(), next = firstFriday(t.getFullYear(), t.getMonth());
+    if (next < t || (dkey(next) === dkey(t) && hadMissaOn(next))) next = firstFriday(t.getFullYear(), t.getMonth() + 1);
+    document.getElementById("ffNext").textContent = dkey(next) === dkey(t)
+      ? "Hoje é primeira sexta-feira."
+      : "Próxima: sexta-feira, " + next.getDate() + " de " + MESES[next.getMonth()] + ".";
+  }
 
   // ---------- Histórico ----------
   function renderHistory(){
@@ -694,8 +779,10 @@ footer a{color:var(--accent)}
         else if (s.pct > 0) cls = "l1";
       } else cls = "future";
       if (hadMissa) cls += " missa";
+      var isFF = dt.getDay() === 5 && d <= 7;
+      if (isFF) cls += " ff";
       if (k === dkey(t)) cls += " today";
-      var label = d + " de " + MESES[m] + (future ? "" : ": " + Math.round(s.pct*100) + "%") + (hadMissa ? ", com Santa Missa" : "");
+      var label = d + " de " + MESES[m] + (isFF ? ", primeira sexta-feira" : "") + (future ? "" : ": " + Math.round(s.pct*100) + "%") + (hadMissa ? ", com Santa Missa" : "");
       html += '<button type="button" class="' + cls.trim() + '" data-day="' + k + '" aria-label="' + label + '"' + (future ? " disabled" : "") + '>' + d + '</button>';
     }
     document.getElementById("cal").innerHTML = html;
@@ -706,6 +793,7 @@ footer a{color:var(--accent)}
     document.getElementById("legendMissa").hidden = !missaOn;
     document.getElementById("stMissa").textContent = missas + (counted ? "/" + counted : "");
     document.getElementById("stMissaLabel").textContent = missas === 1 ? "dia com Santa Missa" : "dias com Santa Missa";
+    renderFirstFridays();
 
     var rows = NORMAS.filter(function(n){ return isSel(n.id); }).map(function(n){
       var poss = 0, done = 0;
