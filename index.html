@@ -992,5 +992,15 @@ footer a{color:var(--accent)}
   renderAll();
 })();
 </script>
+<script>
+  // Contador de visitas (GoatCounter): só conta no endereço publicado no GitHub Pages.
+  if (location.hostname === "sergiobonomijr.github.io") {
+    var gc = document.createElement("script");
+    gc.async = true;
+    gc.src = "https://gc.zgo.at/count.js";
+    gc.setAttribute("data-goatcounter", "https://planodevida.goatcounter.com/count");
+    document.body.appendChild(gc);
+  }
+</script>
 </body>
 </html>
