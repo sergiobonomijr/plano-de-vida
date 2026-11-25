@@ -177,6 +177,18 @@ button:focus-visible, input:focus-visible + .box, textarea:focus-visible, .switc
 }
 .tips{display:flex; flex-direction:column; gap:8px; background:var(--bg); border-radius:12px; padding:14px 16px}
 .tips ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:6px; font-size:15px}
+.myst{display:inline-flex; align-items:center; gap:6px; margin-top:4px; font-size:14px; font-weight:600; color:var(--ink)}
+.myst b{color:var(--accent)}
+.mlist{counter-reset:m; display:flex; flex-direction:column; gap:10px; margin:0; padding:0; list-style:none}
+.mlist li{display:grid; grid-template-columns:34px 1fr; gap:10px; align-items:start; background:var(--bg); border-radius:12px; padding:12px 14px; scroll-margin-top:12px}
+.mlist li::before{counter-increment:m; content:counter(m) "º"; font-family:var(--font-display); font-size:24px; font-weight:700; color:var(--gold); line-height:1}
+.mlist .mt{font-family:var(--font-display); font-size:21px; font-weight:600; line-height:1.2}
+.mlist .mr{font-size:13.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+.week{display:grid; grid-template-columns:auto 1fr; gap:0; border:1px solid var(--line); border-radius:12px; overflow:hidden; font-size:15px}
+.week span{padding:8px 12px; border-top:1px solid var(--line)}
+.week span:nth-child(-n+2){border-top:0}
+.week span.d{font-weight:600}
+.week span.on{background:var(--accent-soft); color:var(--accent); font-weight:700}
 .sheet-src{font-size:13.5px; color:var(--muted)}
 .sheet-src a{color:var(--accent)}
 .legend{display:flex; gap:12px; flex-wrap:wrap; font-size:13px; color:var(--muted); align-items:center}
@@ -480,7 +492,38 @@ footer a{color:var(--accent)}
       src: [["Uma oferenda agradável a Deus: o oferecimento de obras e o «serviam!»","https://opusdei.org/pt-pt/article/uma-oferenda-agradavel-a-deus-o-oferecimento-de-obras-e-o-serviam/"]]
     }
   };
-  var BOOK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>';
+  // Mistérios do Rosário por dia da semana (São João Paulo II, Rosarium Virginis Mariae, 2002)
+  var MISTERIOS = {
+    gozosos: {nome:"Gozosos", lista:[
+      ["A Anunciação do Anjo a Nossa Senhora","Lc 1,26-38"],
+      ["A Visitação de Nossa Senhora a Santa Isabel","Lc 1,39-56"],
+      ["O Nascimento de Jesus em Belém","Lc 2,1-20"],
+      ["A Apresentação do Menino Jesus no Templo","Lc 2,22-38"],
+      ["A Perda e o Encontro do Menino Jesus no Templo","Lc 2,41-52"]]},
+    luminosos: {nome:"Luminosos", lista:[
+      ["O Batismo de Jesus no Jordão","Mt 3,13-17"],
+      ["A autorrevelação de Jesus nas Bodas de Caná","Jo 2,1-11"],
+      ["O anúncio do Reino de Deus e o convite à conversão","Mc 1,14-15"],
+      ["A Transfiguração de Jesus","Lc 9,28-36"],
+      ["A Instituição da Eucaristia","Lc 22,14-20"]]},
+    dolorosos: {nome:"Dolorosos", lista:[
+      ["A Agonia de Jesus no Horto","Lc 22,39-46"],
+      ["A Flagelação de Jesus","Jo 19,1"],
+      ["A Coroação de espinhos","Mt 27,27-31"],
+      ["Jesus carrega a cruz até o Calvário","Jo 19,16-17"],
+      ["A Crucifixão e morte de Jesus","Lc 23,33-46"]]},
+    gloriosos: {nome:"Gloriosos", lista:[
+      ["A Ressurreição de Jesus","Lc 24,1-12"],
+      ["A Ascensão de Jesus ao Céu","At 1,6-11"],
+      ["A vinda do Espírito Santo","At 2,1-13"],
+      ["A Assunção de Nossa Senhora ao Céu","cf. Ap 12,1"],
+      ["A Coroação de Nossa Senhora como Rainha do Céu e da Terra","cf. Ap 12,1"]]}
+  };
+  // getDay(): 0 domingo ... 6 sábado
+  var MIST_SEMANA = ["gloriosos","gozosos","dolorosos","gloriosos","luminosos","dolorosos","gozosos"];
+  function misteriosDe(d){ return MISTERIOS[MIST_SEMANA[d.getDay()]]; }
+
+  var BOOK ='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>';
 
   var ALL_IDS = NORMAS.map(function(n){return n.id;}).concat(PERIODICAS.map(function(p){return p.id;}));
   var DEFAULT_SEL = ALL_IDS.filter(function(id){return id !== "preces";});
@@ -583,7 +626,13 @@ footer a{color:var(--accent)}
       '<input type="checkbox" id="' + id + '" data-id="' + n.id + '"' + (checked ? " checked" : "") + '>' +
       '<span class="box">' + CHECK + '</span>' +
       '<span class="txt"><span class="row"><span class="name">' + n.name + '</span><span class="when">' + n.when + '</span></span>' +
-      '<span class="desc">' + n.desc + '</span>' + prayerBtn(n) + '</span></label>';
+      '<span class="desc">' + n.desc + '</span>' + mysteryLine(n, prefix) + prayerBtn(n) + '</span></label>';
+  }
+  function mysteryLine(n, prefix){
+    if (n.id !== "terco" || prefix !== "d-") return "";
+    var M = misteriosDe(current);
+    return '<span class="myst">' + (dkey(current) === dkey(today()) ? "Hoje" : cap(DIAS[current.getDay()])) + ': <b>Mistérios ' + M.nome + '</b></span>' +
+      '<button type="button" class="prayerbtn" data-prayers="terco">' + BOOK + 'Ver os 5 mistérios</button>';
   }
   function prayerBtn(n){
     if (!n.prayers) return "";
@@ -594,6 +643,7 @@ footer a{color:var(--accent)}
   // ---------- Folha de orações ----------
   var lastFocus = null;
   function openPrayers(key){
+    if (key === "terco"){ openMysteries(); return; }
     var P = PRAYERS[key]; if (!P) return;
     lastFocus = document.activeElement;
     document.getElementById("sheetTitle").textContent = P.title;
@@ -608,6 +658,36 @@ footer a{color:var(--accent)}
     }).join("");
     html += '<div class="tips"><h3>' + P.tipsTitle + '</h3><ul>' + P.tips.map(function(t){ return '<li>' + t + '</li>'; }).join("") + '</ul></div>';
     html += '<p class="sheet-src">Fonte: ' + P.src.map(function(s){ return '<a href="' + s[1] + '" target="_blank" rel="noopener">' + s[0] + '</a>'; }).join(" · ") + '</p>';
+    var body = document.getElementById("sheetBody");
+    body.innerHTML = html; body.scrollTop = 0;
+    document.getElementById("sheet").hidden = false;
+    document.body.style.overflow = "hidden";
+    document.getElementById("sheetClose").focus();
+  }
+  function openMysteries(){
+    var M = misteriosDe(current), isToday = dkey(current) === dkey(today());
+    lastFocus = document.activeElement;
+    document.getElementById("sheetTitle").textContent = "Mistérios " + M.nome;
+    document.getElementById("sheetJump").innerHTML = M.lista.map(function(m, i){
+      return '<button type="button" data-jump="mi-' + i + '">' + (i+1) + 'º mistério</button>';
+    }).join("") + '<button type="button" data-jump="mi-semana">Semana</button>';
+    var when = (isToday ? "Hoje, " : "") + DIAS[current.getDay()] + ", " + current.getDate() + " de " + MESES[current.getMonth()];
+    var html = '<p class="intro">' + cap(when) + '. Em cada dezena, anuncie o mistério e contemple a cena enquanto reza o Pai-Nosso, as dez Ave-Marias e o Glória.</p>';
+    html += '<ol class="mlist">' + M.lista.map(function(m, i){
+      return '<li id="mi-' + i + '"><span><span class="mt">' + m[0] + '</span><br><span class="mr">' + m[1] + '</span></span></li>';
+    }).join("") + '</ol>';
+    var nomes = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
+    var order = [1,2,3,4,5,6,0];
+    html += '<div class="prayer" id="mi-semana"><h3>Os mistérios de cada dia</h3><div class="week">' + order.map(function(i){
+      var on = i === current.getDay() ? " on" : "";
+      return '<span class="d' + on + '">' + nomes[i] + '</span><span class="' + on.trim() + '">' + MISTERIOS[MIST_SEMANA[i]].nome + '</span>';
+    }).join("") + '</div></div>';
+    html += '<div class="tips"><h3>Para rezar melhor</h3><ul>' +
+      '<li>São Josemaria, no livro «Santo Rosário», propõe entrar em cada cena como mais um personagem: olhar, ouvir e conversar com Jesus e Maria.</li>' +
+      '<li>Leia antes, com calma, o trecho do Evangelho indicado em cada mistério.</li>' +
+      '<li>A divisão dos mistérios pelos dias da semana foi proposta por São João Paulo II em 2002, quando acrescentou os Mistérios Luminosos.</li>' +
+      '</ul></div>';
+    html += '<p class="sheet-src">Fonte: <a href="https://www.vatican.va/content/john-paul-ii/pt/apost_letters/2002/documents/hf_jp-ii_apl_20021016_rosarium-virginis-mariae.html" target="_blank" rel="noopener">Carta Apostólica Rosarium Virginis Mariae</a></p>';
     var body = document.getElementById("sheetBody");
     body.innerHTML = html; body.scrollTop = 0;
     document.getElementById("sheet").hidden = false;
